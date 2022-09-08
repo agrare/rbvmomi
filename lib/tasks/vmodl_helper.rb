@@ -239,7 +239,7 @@ class VmodlHelper
 
   def wsdl_to_vmodl_type(type)
     case type.source
-    when /vim25:/, /pbm:/, /sms:/
+    when /vim25:/, /pbm:/, /sms:/, /vslm:/
       vmodl_type = type.name == 'ManagedObjectReference' ? 'ManagedObject' : type.name
     when /xsd:/
       vmodl_type = type.source
@@ -258,6 +258,8 @@ class VmodlHelper
       RbVmomi::PBM
     when 'urn:sms'
       RbVmomi::SMS
+    when 'urn:vslm'
+      RbVmomi::VSLM
     else
       raise ArgumentError, "Unrecognized namespace [#{type}]"
     end
