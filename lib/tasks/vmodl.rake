@@ -3,12 +3,12 @@
 require_relative './vmodl_helper'
 
 namespace :vmodl do
-  desc 'Verify vmodl.db'
+  desc 'Verify vmodl.json'
   task :verify do
     VmodlHelper.verify!
   end
 
-  desc 'Generate vmodl.db'
+  desc 'Generate vmodl.json'
   task :generate do
     VmodlHelper.generate!
   end

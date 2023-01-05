@@ -64,7 +64,7 @@ module RbVmomi
     end
 
     add_extension_dir File.join(File.dirname(__FILE__), 'pbm')
-    load_vmodl(ENV['VMODL'] || File.join(File.dirname(__FILE__), '../../vmodl.db'))
+    load_vmodl(ENV['VMODL'] || File.join(File.dirname(__FILE__), '../../vmodl.json'))
   end
 
 end

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'active_support/core_ext/enumerable'
 require 'active_support/inflector'
+require 'json'
 require 'optimist'
 require 'pathname'
 require 'wsdl/parser'
@@ -30,7 +31,7 @@ class VmodlHelper
       Optimist.options(argv) do
         educate_on_error
         opt :wsdl, 'Path to the vsphere-ws wsdl file', type: :string, required: true
-        opt :vmodl, 'Path to the vmodl.db', type: :string, default: 'vmodl.db'
+        opt :vmodl, 'Path to the vmodl.json', type: :string, default: 'vmodl.json'
         banner <<~EOS
           Usage:
           rake vmodl:#{rake_task} -- --wsdl=path/to/wsdl
@@ -49,14 +50,14 @@ class VmodlHelper
 
   def verify!
     # Loop through the ComplexTypes in the WSDL and compare their types
-    # to the types which are defined in the vmodl.db
+    # to the types which are defined in the vmodl.json
     wsdl_classes_by_name.each_value do |type|
       type_name  = type.name.name
       vmodl_data = @vmodl[type_name]
 
-      # If a type exists in the WSDL but not in the vmodl.db this usually
+      # If a type exists in the WSDL but not in the vmodl.json this usually
       # indicates that it was added in a newer version than the current
-      # vmodl.db supports.
+      # vmodl.json supports.
       #
       # Print a warning that the type is missing and skip it.
       if vmodl_data.nil?
@@ -67,7 +68,7 @@ class VmodlHelper
       # Index the properties by name to make it simpler to find later
       elements_by_name = type.elements.index_by { |e| e.name.name }
 
-      # Loop through the properties defined in the vmodl.db for this type and
+      # Loop through the properties defined in the vmodl.json for this type and
       # compare the type to that property as defined in the wsdl.
       vmodl_data['props'].each do |vmodl_prop|
         wsdl_prop = elements_by_name[vmodl_prop['name']]
@@ -78,7 +79,7 @@ class VmodlHelper
 
         # The vmodl class should be equal to or a subclass of the one in the wsdl.
         # Example of a subclass is e.g. VirtualMachine.host is defined as a HostSystem
-        # in the vmodl.db but it is a ManagedObjectReference in the wsdl.
+        # in the vmodl.json but it is a ManagedObjectReference in the wsdl.
         puts "#{type_name}.#{vmodl_prop["name"]} #{wsdl_klass.wsdl_name} doesn't match #{vmodl_klass.wsdl_name}" unless vmodl_klass <= wsdl_klass
       end
     end
@@ -130,7 +131,7 @@ class VmodlHelper
 
       elements_by_name = type.elements.index_by { |e| e.name.name }
 
-      # Loop through the properties defined in the vmodl.db for this type and
+      # Loop through the properties defined in the vmodl.json for this type and
       # compare the type to that property as defined in the wsdl.
       vmodl_data['props'].each do |vmodl_prop|
         wsdl_prop = elements_by_name[vmodl_prop['name']]
@@ -157,11 +158,11 @@ class VmodlHelper
   end
 
   def load_vmodl(path)
-    Marshal.load(path.read)
+    JSON.load(path.read)
   end
 
   def dump_vmodl!
-    File.write(@vmodl_path, Marshal.dump(@vmodl))
+    File.write(@vmodl_path, JSON.dump(@vmodl))
   end
 
   private

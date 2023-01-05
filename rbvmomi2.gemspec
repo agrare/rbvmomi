@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.license  = 'MIT'
 
   spec.bindir = 'exe'
-  spec.files  = %w[LICENSE README.md vmodl.db] + Dir.glob('{lib,exe}/**/*')
+  spec.files  = %w[LICENSE README.md vmodl.json] + Dir.glob('{lib,exe}/**/*')
   spec.executables << 'rbvmomish'
 
   spec.add_runtime_dependency('builder', '~> 3.2')
